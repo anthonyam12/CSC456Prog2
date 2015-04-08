@@ -1,4 +1,8 @@
 #include <iostream>
+#include "memory_management.h"
+#include "process_scheduler.h"
+#include "page_replacement.h"
+
 
 using namespace std;
 
@@ -10,8 +14,6 @@ int main (int argc, char* argv[])
         return 0;
     }    
 
-    for (int i = 1; i < argc; i++)
-        cout << argv[i] << endl;
-
+    
     return 0;
 }
