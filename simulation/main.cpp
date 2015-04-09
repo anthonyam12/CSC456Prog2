@@ -14,6 +14,7 @@ int main (int argc, char* argv[])
         return 0;
     }    
 
+    ProcessScheduler scheduler;
     
     return 0;
 }
