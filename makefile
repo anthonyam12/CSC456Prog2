@@ -3,8 +3,5 @@ CPP = g++
 
 CFLAGS = -c 
 
-OBJS = simulation/main.o
-
 simulation: $(OBJS)
-	$(CPP) -lm $(OBJS) -o simulation/simulation
-
+	$(CPP) -lm simulation_code/main.cpp -o simulation

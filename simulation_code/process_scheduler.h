@@ -6,6 +6,11 @@
 * This header file will contain all methods to simulate CPU processes
 * scheduling. The methods simulated will be Round Robin, Priority, and Shortest
 * Job First scheduling. 
+*
+* Format of processes array: 
+    processes[i][0] = burst time
+    processes[i][1] = arrival time 
+    processes[i][2] = priortiy (defualt = 0)
 ******************************************************************************/
 
 /******************************************************************************
@@ -33,11 +38,45 @@ class ProcessScheduler
 * Author: Anthony Morast
 *
 * This function takes an array of processes and a time quantum indicating how
-* long each process is alotted the CPU. .... 
+* long each process is alotted the CPU. 
 ******************************************************************************/
 void ProcessScheduler::round_robin ( int** processes, int quantum, int num_procs )
 {
+    int total_time = 0;
 
+    // sort by arrival time? 
+    // preemption and priorities?
+
+    // get total time
+    for (int i = 0; i < num_procs; i++)
+       total_time += processes[i][0]; 
+
+    int k = 0;
+    while (k <= total_time)
+    {
+        // go through all processes in queue
+        for (int i = 0; i < num_procs; i++)
+        {
+            if ( processes[i][0] == 0 )
+                continue;
+
+            // time to add to CPU execution time (k) 
+            int add_time = quantum;
+
+            // if the processes needs the whole quantum, grant it
+            if ( processes[i][0] > quantum )
+                processes[i][0] -= quantum;
+            else if ( processes[i][0] > 0 && processes[i][0] < quantum ) 
+            {
+                // if the processes doesn't need entire quantum, give part
+                processes[i][0] = 0;
+                add_time = processes[i][0];
+            }
+
+            // add time to CPU time
+            k += add_time;
+        }
+    }
 }
 
 /******************************************************************************
@@ -59,6 +98,7 @@ void ProcessScheduler::priority ( int **processes, int num_procs )
 ******************************************************************************/
 void ProcessScheduler::shortest_job_first ( int **processes, int num_procs )
 {
+    processes = burst_sort(processes, num_procs);
 }
 
 /******************************************************************************
@@ -69,7 +109,11 @@ void ProcessScheduler::shortest_job_first ( int **processes, int num_procs )
 ******************************************************************************/
 int** ProcessScheduler::burst_sort ( int **processes, int num_procs )
 {
+    for (int i = 0; i < num_procs; i++)
+    {
 
+    }
+    return processes;
 }
 
 /*****************************************************************************
