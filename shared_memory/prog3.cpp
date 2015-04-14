@@ -1,77 +1,22 @@
-#include "shared_memory.h"
+#include "prog3.h"
 
-
-/***************************************************************************
- * Function: main
- *
- * Description: temporary main function for testing outside dash
- *
-***************************************************************************/
-int main(int argc, char const *argv[])
-{
-	string choice;
-	string message;
-	int shmid;
-	bool FLAG = false;
-
-	cin >> choice;
-
-	if (choice == "make")
-	{
-		// Create 4 mailboxes of 100 KB each
-		shmid = mailbox_init(4, 100);
-		cout << "Shared memory id: " << shmid << endl;	
-		FLAG = true;	
-	}
-	else
-	{
-		cout << "Enter shared memory id: ";
-		cin >> shmid;
-	}
-
-	cout << "Enter w for write or r for read: ";
-	cin >> choice;
-
-	if (choice == "w")
-	{
-		cout << "Enter message: ";
-		cin >> message;
-		// Write to mailbox
-		bool test = mailbox_write(shmid,1, message);
-	}
-	else if (choice == "r")
-	{
-		// Read from mailbox
-		cout << mailbox_read(shmid,1) << endl;
-
-	}
-	else
-		cout << "Invalid option" << endl;
-
-	int bob = 1;
-	while(bob != 0)
-		cin >> bob;
-
-	// Remove mailboxes
-	if (FLAG)
-		mailbox_remove(shmid);
-
-	return 0;
-}
 
 /***************************************************************************
  * Function:    mailbox_init
+ *
+ * Author:      Lisa Woody
  *
  * Description: mailbox initialization function
  *
  * Input:       num - number of mailboxes
  *              size - size of each mailbox
  *
- * Output:      shared memory address
+ * Output:      none
  * 
 ***************************************************************************/
-int mailbox_init(int num, int size)
+void mailbox_init(int num, int size)
 {
+
 	// Header block size (holds size of mailboxes + number of mailboxes)
 	int header_size = (sizeof(int)*2);
 
@@ -83,8 +28,9 @@ int mailbox_init(int num, int size)
 
 	if (shmid < 0)
 	{
-		cout << "Error, shmget failed" << endl;
-		return -1;
+		cout << "Error: Failed to set up shared memory block "
+		     << "or shared memory has already been set up" << endl;
+		return;
 	}
  
 	// Create header:
@@ -96,16 +42,15 @@ int mailbox_init(int num, int size)
 		*headerp = num;
 		*(headerp + 1) = size; 
 
-		// Release shared memory
-		shmdt(headerp);
+	// Release shared memory
+	shmdt(headerp);
 
-
-	// Return shared memory id
-	return(shmid);
 }
 
 /***************************************************************************
  * Function:    mailbox_remove
+ *
+ * Author:      Lisa Woody
  *
  * Description: mailbox removal function
  *
@@ -114,8 +59,18 @@ int mailbox_init(int num, int size)
  * Output:      none
  * 
 ***************************************************************************/
-void mailbox_remove(int shmid)
+void mailbox_remove()
 {
+	// Get shared memory id using key
+	int shmid = shmget(SHMKEY, 0,0);
+
+	// Check if shared memory block has been initialized
+	if ( shmid < 0)
+	{
+		cout << "Error: shared memory has not been set up" << endl;
+		return;
+	}
+
 	// Remove mailboxes
 	shmctl(shmid, IPC_RMID, 0);
 
@@ -125,17 +80,35 @@ void mailbox_remove(int shmid)
 /**************************************************************************
  * Function:    mailbox_write
  *
+ * Author:      Lisa Woody
+ *
  * Description: write data to a mailbox
  *
  * Input:       shmid - shared memory id
  *              index - mailbox number
  *              msg   - message string
  *
- * Output:      boolean write success value
+ * Output:      none
  * 
 **************************************************************************/
-bool mailbox_write(int shmid, int index, string msg)
+void mailbox_write(int index)
 {
+
+	// Get shared memory id using key
+	int shmid = shmget(SHMKEY, 0,0);
+
+	// Check if shared memory block has been initialized
+	if ( shmid < 0)
+	{
+		cout << "Error: shared memory has not been set up" << endl;
+		return;
+	}
+
+	// Get data to be written
+    string msg;
+    cout << "Enter data to be written: ";
+    cin >> msg;
+
 	// Set pointer to start of header
 	int *headerp = (int*)shmat(shmid, 0, 0); 
 
@@ -152,26 +125,23 @@ bool mailbox_write(int shmid, int index, string msg)
 	if (index >= num || index < 0)
 	{
 		cout << "Error: Invalid mailbox index" << endl;
-		return false;
 	}
-
-	// If data is larger than the mailbox, truncate message and flag user 
-	if (msg.length() > ((size * 1024) - 1))
+	else
 	{
-		memcpy(boxp, msg.c_str(), ((size * 1024) - 1));
-		boxp[((size * 1024) - 1)] = '\0';
+		// If data is larger than the mailbox, truncate message and flag user 
+		if (msg.length() > ((size * 1024) - 1))
+		{
+			memcpy(boxp, msg.c_str(), ((size * 1024) - 1));
+			boxp[((size * 1024) - 1)] = '\0';
 
-	}
-	else  // Else, write entire message to mailbox
-	{
-		memcpy(boxp, msg.c_str(), msg.length());
+		}
+		else  // Else, write entire message to mailbox
+			memcpy(boxp, msg.c_str(), msg.length());
 
 	}
 
 	// Release shared memory
 	shmdt(headerp);
-
-	return true;
 
 }
 
@@ -179,16 +149,28 @@ bool mailbox_write(int shmid, int index, string msg)
 /**************************************************************************
  * Function:    mailbox_read
  *
+ * Author:      Lisa Woody
+ *
  * Description: read data from a mailbox
  *
  * Input:       shmid - shared memory id
  *              index - mailbox number
  *
- * Output:      data from mailbox as a string
+ * Output:      none
  * 
 **************************************************************************/
-string mailbox_read(int shmid, int index)
+void mailbox_read(int index)
 {
+	// Get shared memory id using key
+	int shmid = shmget(SHMKEY, 0,0);
+
+	// Check if shared memory block has been initialized
+	if ( shmid < 0)
+	{
+		cout << "Error: shared memory has not been set up" << endl;
+		return;
+	}
+
 	// Set pointer to start of header
 	int *headerp = (int*)shmat(shmid, 0, 0); 
 
@@ -198,24 +180,106 @@ string mailbox_read(int shmid, int index)
 	// Get size of each mailbox from header
 	int size = *(headerp + 1);
 
-	// Get mailbox pointer
-	char *boxp = (char*)headerp + sizeof(int)*2 + (size*1024)*index;
-
+	
 	// Error check
 	if (index >= num || index < 0)
 	{
 		cout << "Error: Invalid mailbox index" << endl;
-		return "";
+
+	}
+	else
+	{
+		// Get mailbox pointer
+		char *boxp = (char*)headerp + sizeof(int)*2 + (size*1024)*index;
+
+		// Read message string
+		cout << boxp << endl;
 	}
 
-	// Create message string
-	string msg = string(boxp);
+
+	// Release shared memory
+	shmdt(headerp);
+}
+
+
+/**************************************************************************
+ * Function:    mailbox_copy
+ *
+ * Author:      Lisa Woody
+ *
+ * Description: copy data from one mailbox to another
+ *
+ * Input:       shmid - shared memory id
+ *              index_from - index of mailbox whose contents will be copied
+ *              index_to   - index of mailbox which will receive the copy
+ *
+ * Output:      none
+ * 
+**************************************************************************/
+void mailbox_copy(int index_from, int index_to)
+{
+	// Get shared memory id using key
+	int shmid = shmget(SHMKEY, 0,0);
+
+	// Check if shared memory block has been initialized
+	if ( shmid < 0)
+	{
+		cout << "Error: shared memory has not been set up" << endl;
+		return;
+	}
+
+	// Set pointer to start of header
+	int *headerp = (int*)shmat(shmid, 0, 0); 
+
+	// Get number of mailboxes from header
+	int num = *headerp;
+
+	// Get size of each mailbox from header
+	int size = *(headerp + 1);
+
+	// Get mailbox pointers
+	char *boxp_to = (char*)headerp + sizeof(int)*2 + (size*1024)*index_from;
+	char *boxp_from = (char*)headerp + sizeof(int)*2 + (size*1024)*index_to;
+
+	// Error check
+	if (index_from >= num || index_from < 0 || 
+		  index_to >= num || index_to < 0 || 
+		  index_to == index_from)
+	{
+		cout << "Error: Invalid mailbox index" << endl;
+	}
+	else
+	{
+		// Copy data from one mailbox to the other
+		strcpy(boxp_to, boxp_from);
+	}
+
 
 	// Release shared memory
 	shmdt(headerp);
 
-	return msg;
-
 }
 
+/**************************************************************************
+ * Function:    check_num
+ *
+ * Author:      Lisa Woody
+ *
+ * Description: check if string is an integer
+ *
+ * Input:       num - string to be tested
+ *
+ * Output:      true if string is an integer, false if it is not an integer
+ * 
+**************************************************************************/
+bool check_num(string num)
+{
+    for(string::const_iterator k = num.begin(); k != num.end(); ++k)
+    {
+        if( isdigit(*k) == false )
+            return false;
+    }
+
+    return true;
+}
 

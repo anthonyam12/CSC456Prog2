@@ -5,7 +5,7 @@
  * Class:      CSC 456
  * Instructor: Dr. Karlsson
  *
- * Program:    Homework 1
+ * Program:    Homework 1, 2, and 3
  * Purpose:    Process identification program          
  *
  * Compile:    make dash
@@ -15,6 +15,7 @@
 
 #include "prog1.h"
 #include "prog2.h"
+#include "prog3.h"
 #include <iostream>
 #include <cctype>
 #include <string.h>
@@ -86,6 +87,59 @@ int main(int argc, char const *argv[])
             {
                 send_signal(command);
             }
+            else if ( command[0] == "mboxinit")
+            {
+                if( command.size() != 3    || 
+                    !check_num(command[1]) || !check_num(command[2]) ) 
+                {
+                    cout << "Usage: mboxinit <number of mailboxes> "
+                         << "<size of mailbox in kbytes>" << endl;
+                }
+                else
+                {
+                    int num = atoi(command[1].c_str());
+                    int size = atoi(command[2].c_str());
+                    mailbox_init(num,size);
+                }
+            }
+            else if ( command[0] == "mboxdel")
+            {
+                mailbox_remove();
+            }
+            else if ( command[0] == "mboxwrite")
+            {
+                if( command.size() != 2 || !check_num(command[1]) ) 
+                    cout << "Usage: mboxwrite <boxnum>" << endl;
+                else
+                {
+                    int index = atoi(command[1].c_str());
+                    mailbox_write(index);
+                }
+            }
+            else if ( command[0] == "mboxread")
+            {
+                if( command.size() != 2 || !check_num(command[1]) ) 
+                    cout << "Usage: mboxread <boxnum>" << endl;
+                else
+                {
+                    int index = atoi(command[1].c_str());
+                    mailbox_read(index);
+                }
+            }
+            else if ( command[0] == "mboxcopy")
+            {
+                if( command.size() != 3    || 
+                    !check_num(command[1]) || !check_num(command[2]) ) 
+                {
+                    cout << "Usage: mboxcopy <boxnum1> <boxnum2>" << endl;
+                }
+                else
+                {
+                    int index_from = atoi(command[1].c_str());
+                    int index_to = atoi(command[2].c_str());
+                    mailbox_copy(index_from, index_to);
+                }
+            }
             else if ( command[0] == "help")
             {
                 help();
@@ -137,6 +191,13 @@ void help()
          << " <cmd> > <file>     - Redirects output from cmd into file" << endl
          << " <cmd> < <file>     - Uses file as input for command cmd" << endl
          << " systat             - Displays system information" << endl
+         << " mboxinit <number of mailboxes> <size of mailbox in kbytes> " << endl
+         << "                    - Allocates shared memory mailboxes" << endl
+         << " mboxdel            - Cleans up semaphores and shared memory" << endl
+         << " mboxwrite <boxnum> - Write data to a shared memory mailbox" << endl
+         << " mboxread <boxnum>  - Read data from a shared memory mailbox" << endl
+         << " mboxcopy <boxnum1> <boxnum2>" << endl
+         << "                    - Copy the contents of one mailbox to another"
          << " exit               - Exits the program" << endl
          << " help               - Displays usage information and supported commands" << endl;
 }
