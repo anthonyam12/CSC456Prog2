@@ -47,22 +47,28 @@ int main(int argc, char const *argv[])
 		cout << "dash> ";
 
         // Get and tokenize user input
-		getline(cin, usr_input);
-        char* temp;
-        temp = strtok((char*)usr_input.c_str()," ");
-
-        // Put words in user input in a vector
-        while(temp != NULL )
+		if (getline(cin, usr_input))
         {
-        	command.push_back(temp);
-        	temp = strtok(NULL," ");
+            char* temp;
+            temp = strtok((char*)usr_input.c_str()," ");
+            // Put words in user input in a vector
+            while(temp != NULL)
+            {
+                command.push_back(temp);
+                temp = strtok(NULL," ");
+            }
         }
+        else  // Fix for ctrl-D causing an infinite loop
+        {
+            cout << endl;
+            FLAG = false;
+        }
+            
+ 
 
         // If user input is not <enter> or a space, match to supported command
         if(command.size() != 0)
         {
-           
-
             if ( command[0] == "exit")
             {
             	FLAG = false;
@@ -89,18 +95,7 @@ int main(int argc, char const *argv[])
             }
             else if ( command[0] == "mboxinit")
             {
-                if( command.size() != 3    || 
-                    !check_num(command[1]) || !check_num(command[2]) ) 
-                {
-                    cout << "Usage: mboxinit <number of mailboxes> "
-                         << "<size of mailbox in kbytes>" << endl;
-                }
-                else
-                {
-                    int num = atoi(command[1].c_str());
-                    int size = atoi(command[2].c_str());
-                    mailbox_init(num,size);
-                }
+                mailbox_init(command);
             }
             else if ( command[0] == "mboxdel")
             {
@@ -108,37 +103,15 @@ int main(int argc, char const *argv[])
             }
             else if ( command[0] == "mboxwrite")
             {
-                if( command.size() != 2 || !check_num(command[1]) ) 
-                    cout << "Usage: mboxwrite <boxnum>" << endl;
-                else
-                {
-                    int index = atoi(command[1].c_str());
-                    mailbox_write(index);
-                }
+                mailbox_write(command);
             }
             else if ( command[0] == "mboxread")
             {
-                if( command.size() != 2 || !check_num(command[1]) ) 
-                    cout << "Usage: mboxread <boxnum>" << endl;
-                else
-                {
-                    int index = atoi(command[1].c_str());
-                    mailbox_read(index);
-                }
+                mailbox_read(command);
             }
             else if ( command[0] == "mboxcopy")
             {
-                if( command.size() != 3    || 
-                    !check_num(command[1]) || !check_num(command[2]) ) 
-                {
-                    cout << "Usage: mboxcopy <boxnum1> <boxnum2>" << endl;
-                }
-                else
-                {
-                    int index_from = atoi(command[1].c_str());
-                    int index_to = atoi(command[2].c_str());
-                    mailbox_copy(index_from, index_to);
-                }
+                mailbox_copy(command);
             }
             else if ( command[0] == "help")
             {

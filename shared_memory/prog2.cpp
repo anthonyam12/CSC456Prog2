@@ -42,17 +42,22 @@ void fork_exec(vector<string> & command)
     getrusage(RUSAGE_CHILDREN, &use);
 
 	// Wait for the child to exit.
-	waitpid = wait(&status); 
+	waitpid = wait(&status);
 
-    cout << "------------------------------------------" << endl;    
-    cout << "Child process information:" << endl
-    	 << "      Process id     : " << waitpid << endl
+    if ( status == 0)
+    {
+        cout << "------------------------------------------" << endl;    
+        cout << "Child process information:" << endl
+         << "      Process id     : " << waitpid << endl
          << "      Exit status    : " << status << endl
          << "      User CPU Time  : " << use.ru_utime.tv_sec << "." << use.ru_utime.tv_usec << endl
          << "      System CPU Time: " << use.ru_stime.tv_sec << "." << use.ru_stime.tv_usec << endl
          << "      Num page faults: " << use.ru_majflt << endl
          << "      Num of swaps   : " << use.ru_nswap << endl;
-    cout <<"------------------------------------------" << endl;
+        cout <<"------------------------------------------" << endl;
+    }
+
+
 
 	
 	return;

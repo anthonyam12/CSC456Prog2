@@ -1,21 +1,33 @@
+/*/ Author: Lisa /*/
+
 #include "prog3.h"
 
 
 /***************************************************************************
  * Function:    mailbox_init
  *
- * Author:      Lisa Woody
- *
  * Description: mailbox initialization function
  *
- * Input:       num - number of mailboxes
- *              size - size of each mailbox
+ * Input:       command - argument vector containing the number of mailboxes
+ *                        and the size of each mailbox
  *
  * Output:      none
  * 
 ***************************************************************************/
-void mailbox_init(int num, int size)
+void mailbox_init(vector<string> & command)
 {
+	// Error checking
+    if( command.size() != 3    || 
+        !check_num(command[1]) || !check_num(command[2]) ) 
+    {
+        cout << "Usage: mboxinit <number of mailboxes> "
+             << "<size of mailbox in kbytes>" << endl;
+        return;
+    }
+    
+    // Get number of mailboxes and mailbox size from arguments
+    int num = atoi(command[1].c_str());
+    int size = atoi(command[2].c_str());
 
 	// Header block size (holds size of mailboxes + number of mailboxes)
 	int header_size = (sizeof(int)*2);
@@ -29,7 +41,7 @@ void mailbox_init(int num, int size)
 	if (shmid < 0)
 	{
 		cout << "Error: Failed to set up shared memory block "
-		     << "or shared memory has already been set up" << endl;
+		     << "or a shared memory block has already been initialized" << endl;
 		return;
 	}
  
@@ -50,11 +62,9 @@ void mailbox_init(int num, int size)
 /***************************************************************************
  * Function:    mailbox_remove
  *
- * Author:      Lisa Woody
- *
  * Description: mailbox removal function
  *
- * Input:       shmid - shared memory id
+ * Input:       none
  *
  * Output:      none
  * 
@@ -67,7 +77,8 @@ void mailbox_remove()
 	// Check if shared memory block has been initialized
 	if ( shmid < 0)
 	{
-		cout << "Error: shared memory has not been set up" << endl;
+		cout << "Error: Request could not be completed - Shared memory " 
+			 << "block has not been initialized" << endl;
 		return;
 	}
 
@@ -80,19 +91,25 @@ void mailbox_remove()
 /**************************************************************************
  * Function:    mailbox_write
  *
- * Author:      Lisa Woody
- *
  * Description: write data to a mailbox
  *
- * Input:       shmid - shared memory id
- *              index - mailbox number
- *              msg   - message string
+ * Input:       command - argument vector containing the index number of 
+ *                        the mailbox to which data is to be written.
  *
  * Output:      none
  * 
 **************************************************************************/
-void mailbox_write(int index)
+void mailbox_write(vector<string> & command)
 {
+	// Error checking
+    if( command.size() != 2 || !check_num(command[1]) )
+    {
+    	cout << "Usage: mboxwrite <boxnum>" << endl;
+    	return;
+    }
+
+    // Get mailbox number 
+    int index = atoi(command[1].c_str());
 
 	// Get shared memory id using key
 	int shmid = shmget(SHMKEY, 0,0);
@@ -100,14 +117,18 @@ void mailbox_write(int index)
 	// Check if shared memory block has been initialized
 	if ( shmid < 0)
 	{
-		cout << "Error: shared memory has not been set up" << endl;
+		cout << "Error: Request could not be completed - Shared memory " 
+			 << "block has not been initialized" << endl;
 		return;
 	}
 
 	// Get data to be written
-    string msg;
+    string msg, line;
     cout << "Enter data to be written: ";
-    cin >> msg;
+    while (getline(cin, line))
+		msg.append(line);
+	cout << endl;
+	cin.clear();
 
 	// Set pointer to start of header
 	int *headerp = (int*)shmat(shmid, 0, 0); 
@@ -149,25 +170,34 @@ void mailbox_write(int index)
 /**************************************************************************
  * Function:    mailbox_read
  *
- * Author:      Lisa Woody
- *
  * Description: read data from a mailbox
  *
- * Input:       shmid - shared memory id
- *              index - mailbox number
+ * Input:       command - argument vector containing the index number of 
+ *                        the mailbox from which data is to be read.
  *
  * Output:      none
  * 
 **************************************************************************/
-void mailbox_read(int index)
+void mailbox_read(vector<string> & command)
 {
+	// Error checking
+    if( command.size() != 2 || !check_num(command[1]) ) 
+    {
+    	cout << "Usage: mboxread <boxnum>" << endl;
+    	return;
+    }
+    
+    // Get mailbox number
+    int index = atoi(command[1].c_str());
+	
 	// Get shared memory id using key
 	int shmid = shmget(SHMKEY, 0,0);
 
 	// Check if shared memory block has been initialized
 	if ( shmid < 0)
 	{
-		cout << "Error: shared memory has not been set up" << endl;
+		cout << "Error: Request could not be completed - Shared memory " 
+			 << "block has not been initialized" << endl;
 		return;
 	}
 
@@ -205,26 +235,36 @@ void mailbox_read(int index)
 /**************************************************************************
  * Function:    mailbox_copy
  *
- * Author:      Lisa Woody
- *
  * Description: copy data from one mailbox to another
  *
- * Input:       shmid - shared memory id
- *              index_from - index of mailbox whose contents will be copied
- *              index_to   - index of mailbox which will receive the copy
+ * Input:       command - argument vector containing the index numbers of 
+ *                        the two mailboxes involved in the copy transaction
  *
  * Output:      none
  * 
 **************************************************************************/
-void mailbox_copy(int index_from, int index_to)
+void mailbox_copy(vector<string> & command)
 {
+	// Error checking
+	if( command.size() != 3    || 
+	    !check_num(command[1]) || !check_num(command[2]) ) 
+	{
+	    cout << "Usage: mboxcopy <boxnum1> <boxnum2>" << endl;
+	    return;
+	}
+	
+	// Get index numbers of the two mailboxes
+	int index_from = atoi(command[1].c_str());
+	int index_to = atoi(command[2].c_str());
+	
 	// Get shared memory id using key
 	int shmid = shmget(SHMKEY, 0,0);
 
 	// Check if shared memory block has been initialized
 	if ( shmid < 0)
 	{
-		cout << "Error: shared memory has not been set up" << endl;
+		cout << "Error: Request could not be completed - Shared memory " 
+			 << "block has not been initialized" << endl;
 		return;
 	}
 
@@ -262,8 +302,6 @@ void mailbox_copy(int index_from, int index_to)
 
 /**************************************************************************
  * Function:    check_num
- *
- * Author:      Lisa Woody
  *
  * Description: check if string is an integer
  *
