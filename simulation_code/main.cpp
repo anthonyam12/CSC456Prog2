@@ -38,10 +38,12 @@ int main (int argc, char* argv[])
         processes[i].process_id = i;
 //        printf("Process %d has burst time %d, arrived at %d, and has priority %d.\n", i, processes[i].burst_time, processes[i].arrival_time, processes[i].priority);
     }
-    int dummy;
-//    cin >> dummy;
+//    int dummy;
+//   cin >> dummy;
 
     ProcessScheduler scheduler;
-    scheduler.round_robin(processes, 3, 10);
+//    scheduler.round_robin(processes, 3, 10);
+
+    scheduler.shortest_job_first(processes, 10);
     return 0;
 }

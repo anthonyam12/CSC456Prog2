@@ -43,7 +43,15 @@ class ProcessScheduler
 * Author: Anthony Morast
 *
 * This function takes an array of processes and a time quantum indicating how
-* long each process is alotted the CPU. 
+* long each process is alotted the CPU. The algorithm begins by sorting the 
+* input array of processes by their arrival time which is more convienient for
+* the remainder of the algorithm and by determining how much time all of the 
+* processes will take. Then each clock_tick is cycled through using an new 
+* array of queued processes. If a new process arrives it is added to the end of
+* the queue. If the running process is finished or the quantum has expired the
+* processes are all shifted in the queue to a higher position and the process
+* is re-added to the end of the list if it needs further execution otherwise
+* it is deleted.
 ******************************************************************************/
 void ProcessScheduler::round_robin ( Process* processes, int quantum, int num_procs )
 {
@@ -107,9 +115,6 @@ void ProcessScheduler::round_robin ( Process* processes, int quantum, int num_pr
        // cout << endl;
     }
 
-    delete []queued_procs;
-    delete []processes;
-
     return;
 }
 
@@ -132,7 +137,48 @@ void ProcessScheduler::priority ( Process *processes, int num_procs )
 ******************************************************************************/
 void ProcessScheduler::shortest_job_first ( Process *processes, int num_procs )
 {
-    processes = burst_sort(processes, num_procs);
+    processes = arrival_sort(processes, num_procs);  // sort by arrival time
+    Process *q_procs = new Process[num_procs];
+    int total_time = 0;
+    int q_size = 0;
+    Process temp;
+
+    for (int i = 0; i < num_procs; i++)
+        total_time += processes[i].burst_time;
+
+    for (int time = 0; time < total_time; time++)
+    {
+        bool higher_priority = false;
+        for (int i = 0; i < num_procs; i++)
+        {
+            if (processes[i].arrival_time == time)
+            {
+                q_procs[q_size] = processes[i];     // add process to list
+                q_size++;                           // increment size
+//                printf("Process %d added at time %d\n", q_procs[q_size-1].process_id, time);
+            }
+        }        
+        if (q_size > 0)
+        {
+            q_procs[0].burst_time--;
+            if (q_procs[0].burst_time <= 0)
+            {
+                for (int j = 1; j < q_size; j++) // move procs up in queue
+                    q_procs[j-1] = q_procs[j];
+                q_size--;          
+            }
+
+            // re order by job length
+            q_procs = burst_sort (q_procs, q_size);
+            for (int k = 0; k < q_size; k++)
+//                printf("Process: %d   Priority: %d\n", q_procs[k].process_id, q_procs[k].priority);
+        }        
+    }
+
+//    delete []processes;
+//    delete []q_procs;
+
+    return;
 }
 
 /******************************************************************************
@@ -151,8 +197,28 @@ Process* ProcessScheduler::burst_sort ( Process *processes, int num_procs )
         sorted_procs[i].priority = processes[i].priority;
         sorted_procs[i].process_id = processes[i].process_id;
     }
-    
-    return sorted_procs;
+ 
+    int i, j;
+    Process temp;
+    for (i = 1; i < num_procs; i++)
+    {
+        for (j = i; j >= 1; j--)
+        {
+            if (sorted_procs[j].priority > sorted_procs[j-1].priority)
+            {   
+                temp = sorted_procs[j];
+                sorted_procs[j] = sorted_procs[j-1];
+                sorted_procs[j-1] = temp;
+            }
+            else break;
+        }        
+    }
+
+    for (i = 0; i < num_procs; i++)
+        processes[i] = sorted_procs[i];
+
+    delete []sorted_procs;
+    return processes;
 }
 
 /*****************************************************************************
