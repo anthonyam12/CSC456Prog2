@@ -5,13 +5,7 @@
 *
 * This header file will contain all methods to simulate CPU processes
 * scheduling. The methods simulated will be Round Robin, Priority, and Shortest
-* Job First scheduling. 
-*
-* Format of processes array: 
-    processes[i][0] = burst time
-    processes[i][1] = arrival time 
-    processes[i][2] = priortiy (defualt = 0)
-    
+* Job First scheduling.     
 ******************************************************************************/
 
 /******************************************************************************
@@ -27,12 +21,14 @@ class ProcessScheduler
 {
     public:
         void round_robin ( Process *processes, int quantum, int num_procs );
-        void priority ( Process *processes, int num_procs );
-        void shortest_job_first ( Process *processes, int num_procs );
+        void priority ( Process *processes, int num_procs, bool preempt );
+        void shortest_job_first ( Process *processes, int num_procs, bool preempt );
     private:
         Process *burst_sort ( Process *processes, int num_procs );
         Process *priority_sort ( Process *processes, int num_procs );
         Process *arrival_sort ( Process *processes, int num_procs);
+        float calculateTurnaround (Process *processes, int num_procs);
+        float calculateResponse (Process *processes, int num_procs);
 };
 
 /******************************************************************************
@@ -67,10 +63,12 @@ void ProcessScheduler::round_robin ( Process* processes, int quantum, int num_pr
     // sort by arrival time
     processes = arrival_sort(processes, num_procs);
     Process *queued_procs = new Process[num_procs]; 
+    Process *finished_procs = new Process[num_procs];
 
     int time = 0, running_time = 0;
-    int queued_procs_size = 0;
+    int queued_procs_size = 0, fin_proc_size = 0;
 
+    cout << "ROUND ROBIN: " << endl;
     for (time = 0; time < total_time; time++)
     {
         // add processes that just arrived to end of queue
@@ -79,16 +77,21 @@ void ProcessScheduler::round_robin ( Process* processes, int quantum, int num_pr
             if (processes[i].arrival_time == time)
             {
                 queued_procs[queued_procs_size] = processes[i];
-//                printf("Added process %d to queue with burst time %d and arrival time %d at cpu time %d\n",
-//                        processes[i].process_id, processes[i].burst_time, processes[i].arrival_time, time);
                 queued_procs_size++;
             }
         }
         if (queued_procs_size > 0)  // if there are processes running or need be ran
         {
+            if (queued_procs[0].first_service)
+            {
+                queued_procs[0].response_time = time;
+                queued_procs[0].first_service = false;
+            }
+
             queued_procs[0].burst_time--;
             running_time++;
-//            printf("Process %d running at time %d with %d burst time remaining.\n", queued_procs[0].process_id, time, queued_procs[0].burst_time);
+            printf("TIME: %d  PID: %d  BURST REMAINING: %d\n", time, queued_procs[0].process_id, queued_procs[0].burst_time); 
+
             // if the time quantum is up OR the process has completed
             if ( running_time % quantum == 0 || queued_procs[0].burst_time == 0 )
             {
@@ -99,9 +102,11 @@ void ProcessScheduler::round_robin ( Process* processes, int quantum, int num_pr
                 //if the processes is done, remove it
                 if ( temp.burst_time == 0 )
                 {
-//                    printf("Process %d has finished at time %d\n", temp.process_id, time);
                     running_time = 0;
                     queued_procs_size--;
+                    temp.finish_time = time;
+                    finished_procs[fin_proc_size] = temp;
+                    fin_proc_size++;
                 }
                 else // put it at the end
                 {
@@ -109,12 +114,15 @@ void ProcessScheduler::round_robin ( Process* processes, int quantum, int num_pr
                 }
             }
         }
-       // printf("Queue at time %d: ", time);
-       // for (int i = 0; i < queued_procs_size; i++)
-       //     cout << queued_procs[i].process_id + " ";
-       // cout << endl;
+        else
+            cout << "CPU IDLE AT TIME " << time << endl;
     }
 
+    cout << endl << "Average Turnaround Time: " << calculateTurnaround(finished_procs, num_procs);
+    cout << endl << "Average Response Time: " << calculateResponse(finished_procs, num_procs) << endl; 
+
+    delete[] queued_procs;
+    delete[] finished_procs;
     return;
 }
 
@@ -124,7 +132,7 @@ void ProcessScheduler::round_robin ( Process* processes, int quantum, int num_pr
 * priority takes an array of processes and their corresponding priorities. The
 * method will implement the Priority scheduling algorithm. ....
 ******************************************************************************/
-void ProcessScheduler::priority ( Process *processes, int num_procs )
+void ProcessScheduler::priority ( Process *processes, int num_procs, bool preempt )
 {
 
 }
@@ -135,17 +143,22 @@ void ProcessScheduler::priority ( Process *processes, int num_procs )
 * shortest_job_first will take an array of processes to be scheduled. The
 * array should contain the process length in an index. ....
 ******************************************************************************/
-void ProcessScheduler::shortest_job_first ( Process *processes, int num_procs )
+void ProcessScheduler::shortest_job_first ( Process *processes, int num_procs, bool preempt )
 {
     processes = arrival_sort(processes, num_procs);  // sort by arrival time
     Process *q_procs = new Process[num_procs];
+    Process *fin_procs = new Process[num_procs];
+
     int total_time = 0;
     int q_size = 0;
+    int fin_size = 0;
+
     Process temp;
 
     for (int i = 0; i < num_procs; i++)
         total_time += processes[i].burst_time;
 
+    cout << "Shortest Job First: " << endl;
     for (int time = 0; time < total_time; time++)
     {
         bool higher_priority = false;
@@ -155,29 +168,44 @@ void ProcessScheduler::shortest_job_first ( Process *processes, int num_procs )
             {
                 q_procs[q_size] = processes[i];     // add process to list
                 q_size++;                           // increment size
-//                printf("Process %d added at time %d\n", q_procs[q_size-1].process_id, time);
             }
         }        
         if (q_size > 0)
         {
+            if (q_procs[0].first_service)
+            {
+                q_procs[0].first_service = false;
+                q_procs[0].response_time = time;
+            }
+
             q_procs[0].burst_time--;
+            printf ("Process %d ran at time %d, priority = %d\n", q_procs[0].process_id, time, q_procs[0].priority);
+
             if (q_procs[0].burst_time <= 0)
             {
+                q_procs[0].finish_time = time;
+                fin_procs[fin_size] = q_procs[0];
+                fin_size++;
+
                 for (int j = 1; j < q_size; j++) // move procs up in queue
                     q_procs[j-1] = q_procs[j];
                 q_size--;          
+                q_procs = burst_sort (q_procs, q_size);
             }
 
             // re order by job length
-            q_procs = burst_sort (q_procs, q_size);
-            for (int k = 0; k < q_size; k++)
-//                printf("Process: %d   Priority: %d\n", q_procs[k].process_id, q_procs[k].priority);
-        }        
+            if (preempt)
+                q_procs = burst_sort (q_procs, q_size);
+        }   
+        else
+            cout << "CPU Idle at time " << time << endl;     
     }
 
-//    delete []processes;
-//    delete []q_procs;
+    cout << endl << "Average Turnaround Time: " << calculateTurnaround(fin_procs, num_procs);
+    cout << endl << "Average Response Time: " << calculateResponse(fin_procs, num_procs) << endl; 
 
+    delete[] fin_procs;
+    delete[] q_procs;
     return;
 }
 
@@ -251,13 +279,7 @@ Process *ProcessScheduler::arrival_sort (Process *processes, int num_procs)
     Process *sorted_procs = new Process[num_procs];
 
     for (int i = 0; i < num_procs; i++)
-    {
-        sorted_procs[i].burst_time = processes[i].burst_time;
-        sorted_procs[i].arrival_time = processes[i].arrival_time;
-        sorted_procs[i].priority = processes[i].priority;
-        sorted_procs[i].process_id = processes[i].process_id;
-    }
-
+        sorted_procs[i] = processes[i];
 
     int i, j;
     Process temp;
@@ -276,4 +298,35 @@ Process *ProcessScheduler::arrival_sort (Process *processes, int num_procs)
     }
   
     return sorted_procs;
+}
+/******************************************************************************
+* Author: Anthony Morast
+* 
+* This function calculates the average turnaround time of a set of processes.
+******************************************************************************/
+float ProcessScheduler::calculateTurnaround(Process *processes, int num_procs)
+{
+    float average = 0;
+
+    for (int i = 0; i < num_procs; i++)
+        average += (processes[i].finish_time - processes[i].arrival_time);
+    average /= num_procs;
+
+    return average;
+}
+
+/******************************************************************************
+* Author: Anthony Morast
+*
+* This function calculates the average response time of a set of processes. 
+******************************************************************************/
+float ProcessScheduler::calculateResponse(Process *processes, int num_procs)
+{
+    float average = 0;
+
+    for (int i = 0; i < num_procs; i++)
+        average += processes[i].response_time;
+    average /= num_procs;
+
+    return average;
 }

@@ -4,4 +4,4 @@ CPP = g++
 CFLAGS = -c 
 
 simulation: $(OBJS)
-	$(CPP) -lm simulation_code/main.cpp -o simulation
+	$(CPP) -std=c++11 -lm simulation_code/main.cpp -o simulation

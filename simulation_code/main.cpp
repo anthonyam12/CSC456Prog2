@@ -18,32 +18,30 @@ int main (int argc, char* argv[])
     }    
 
     srand(time(0));
+    bool preemptive = false;
+    int num_procs = 10;
+    int quantum = 3;
     
-    /*  IMPORTANT: for anyone editting this file, I was hoping to have the processes
-        array have the following format for the first 3 indicies per processes:
-            processes[i][0] = burst_time
-            processes[i][1] = arrival time
-            processes[i][2] = priority (default = 0)
-        This is what I've based my class on so far, if we need to change I can, just
-        a preference. Anything you might need in this array could be in indicies
-        3-inf.  Thanks! 
-    */
     Process *processes;
-    processes = new Process[10]; 
-    for (int i = 0; i < 10; i++)
+    processes = new Process[num_procs]; 
+    cout << "Generated Process: " << endl;
+    for (int i = 0; i < num_procs; i++)
     {
-        processes[i].burst_time = rand() % 15 + 1;
+        processes[i].burst_time = rand() % 10 + 1;
         processes[i].arrival_time = rand() % 5;
         processes[i].priority = rand() % 5;
         processes[i].process_id = i;
-//        printf("Process %d has burst time %d, arrived at %d, and has priority %d.\n", i, processes[i].burst_time, processes[i].arrival_time, processes[i].priority);
+        printf("Process %d has burst time %d, arrived at %d, and has priority %d.\n", i, processes[i].burst_time, processes[i].arrival_time, processes[i].priority);
     }
-//    int dummy;
-//   cin >> dummy;
-
+    cout << endl << endl;
+    
     ProcessScheduler scheduler;
-//    scheduler.round_robin(processes, 3, 10);
+    scheduler.round_robin(processes, quantum, num_procs);
+    cout << endl << endl;
+    scheduler.shortest_job_first(processes, num_procs, preemptive);
+    cout << endl << endl;
+    scheduler.priority(processes, num_procs, preemptive);
+    cout << endl << endl;
 
-    scheduler.shortest_job_first(processes, 10);
     return 0;
 }
