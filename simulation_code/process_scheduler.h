@@ -90,7 +90,7 @@ void ProcessScheduler::round_robin ( Process* processes, int quantum, int num_pr
 
             queued_procs[0].burst_time--;
             running_time++;
-            printf("TIME: %d  PID: %d  BURST REMAINING: %d\n", time, queued_procs[0].process_id, queued_procs[0].burst_time); 
+            printf("TIME: %d  PID: %d\n", time, queued_procs[0].process_id); 
 
             // if the time quantum is up OR the process has completed
             if ( running_time % quantum == 0 || queued_procs[0].burst_time == 0 )
@@ -121,8 +121,6 @@ void ProcessScheduler::round_robin ( Process* processes, int quantum, int num_pr
     cout << endl << "Average Turnaround Time: " << calculateTurnaround(finished_procs, num_procs);
     cout << endl << "Average Response Time: " << calculateResponse(finished_procs, num_procs) << endl; 
 
-    delete[] queued_procs;
-    delete[] finished_procs;
     return;
 }
 
@@ -133,8 +131,62 @@ void ProcessScheduler::round_robin ( Process* processes, int quantum, int num_pr
 * method will implement the Priority scheduling algorithm. ....
 ******************************************************************************/
 void ProcessScheduler::priority ( Process *processes, int num_procs, bool preempt )
-{
+{   
+    Process* q_procs = new Process[num_procs];
+    Process* fin_procs = new Process[num_procs];
 
+    int fin_size = 0, q_size = 0;
+    int time = 0;
+    int total_time = 0;
+
+    for (int i = 0; i < num_procs; i++)
+        total_time += processes[i].burst_time;
+
+    for (time = 0; time < total_time; time++)
+    {
+        for (int i = 0; i < num_procs; i++)
+        {
+            if (processes[i].arrival_time == time)
+            {
+                q_procs[q_size] = processes[i];
+                q_size++;
+            }
+        }
+        if (q_size > 0)
+        {
+            if (q_procs[0].first_service)
+            {
+                q_procs[0].response_time = time;
+                q_procs[0].first_service = false;
+            }
+            q_procs[0].burst_time--;
+            printf("TIME: %d  PID: %d  PRIORITY: %d\n", time, q_procs[0].process_id, q_procs[0].priority);
+
+            if (q_procs[0].burst_time <= 0)
+            {
+                q_procs[0].finish_time = time;
+                fin_procs[fin_size] = q_procs[0];
+                fin_size++;
+
+                for (int j = 1; j < q_size; j++)
+                    q_procs[j-1] = q_procs[j];
+                q_size--;
+               
+                 if (!preempt)
+                    q_procs = priority_sort(q_procs, q_size);
+            }            
+
+            if (preempt)
+                q_procs = priority_sort(q_procs, q_size);
+        }
+        else 
+            cout << "CPU Idle at time " << time << endl;
+    }
+
+    cout << endl << "Average Turnaround Time: " << calculateTurnaround(fin_procs, num_procs);
+    cout << endl << "Average Response Time: " << calculateResponse(fin_procs, num_procs) << endl; 
+    
+    return;
 }
 
 /******************************************************************************
@@ -161,7 +213,6 @@ void ProcessScheduler::shortest_job_first ( Process *processes, int num_procs, b
     cout << "Shortest Job First: " << endl;
     for (int time = 0; time < total_time; time++)
     {
-        bool higher_priority = false;
         for (int i = 0; i < num_procs; i++)
         {
             if (processes[i].arrival_time == time)
@@ -179,7 +230,7 @@ void ProcessScheduler::shortest_job_first ( Process *processes, int num_procs, b
             }
 
             q_procs[0].burst_time--;
-            printf ("Process %d ran at time %d, priority = %d\n", q_procs[0].process_id, time, q_procs[0].priority);
+            printf ("TIME: %d  PID: %d  BURST REMAINING: %d\n", time, q_procs[0].process_id, q_procs[0].burst_time);
 
             if (q_procs[0].burst_time <= 0)
             {
@@ -189,8 +240,9 @@ void ProcessScheduler::shortest_job_first ( Process *processes, int num_procs, b
 
                 for (int j = 1; j < q_size; j++) // move procs up in queue
                     q_procs[j-1] = q_procs[j];
-                q_size--;          
-                q_procs = burst_sort (q_procs, q_size);
+                q_size--;         
+                if (!preempt) 
+                    q_procs = burst_sort (q_procs, q_size);
             }
 
             // re order by job length
@@ -204,8 +256,6 @@ void ProcessScheduler::shortest_job_first ( Process *processes, int num_procs, b
     cout << endl << "Average Turnaround Time: " << calculateTurnaround(fin_procs, num_procs);
     cout << endl << "Average Response Time: " << calculateResponse(fin_procs, num_procs) << endl; 
 
-    delete[] fin_procs;
-    delete[] q_procs;
     return;
 }
 
@@ -219,12 +269,7 @@ Process* ProcessScheduler::burst_sort ( Process *processes, int num_procs )
 { 
     Process *sorted_procs = new Process[num_procs];
     for (int i = 0; i < num_procs; i++)
-    {
-        sorted_procs[i].burst_time = processes[i].burst_time;
-        sorted_procs[i].arrival_time = processes[i].arrival_time;
-        sorted_procs[i].priority = processes[i].priority;
-        sorted_procs[i].process_id = processes[i].process_id;
-    }
+        sorted_procs[i] = processes[i];
  
     int i, j;
     Process temp;
@@ -245,7 +290,6 @@ Process* ProcessScheduler::burst_sort ( Process *processes, int num_procs )
     for (i = 0; i < num_procs; i++)
         processes[i] = sorted_procs[i];
 
-    delete []sorted_procs;
     return processes;
 }
 
@@ -258,13 +302,24 @@ Process* ProcessScheduler::priority_sort ( Process *processes, int num_procs )
 {
     Process *sorted_procs = new Process[num_procs];
     for (int i = 0; i < num_procs; i++)
-    {
-        sorted_procs[i].burst_time = processes[i].burst_time;
-        sorted_procs[i].arrival_time = processes[i].arrival_time;
-        sorted_procs[i].priority = processes[i].priority;
-        sorted_procs[i].process_id = processes[i].process_id;
-    }
+        sorted_procs[i] = processes[i];
     
+    int i, j;
+    Process temp;
+    for (i = 1; i < num_procs; i++)
+    {
+        for (j=i; j >= 1; j--)
+        {
+            if (sorted_procs[j].priority < sorted_procs[j-1].priority)
+            {
+                temp = sorted_procs[j];
+                sorted_procs[j] = sorted_procs[j-1];
+                sorted_procs[j-1] = temp;
+            }
+            else break;
+        }
+    }
+
     return sorted_procs;
 } 
 
