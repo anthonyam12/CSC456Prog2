@@ -139,6 +139,8 @@ void ProcessScheduler::priority ( Process *processes, int num_procs, bool preemp
     int time = 0;
     int total_time = 0;
 
+    bool first_sort = true;
+
     for (int i = 0; i < num_procs; i++)
         total_time += processes[i].burst_time;
 
@@ -150,6 +152,11 @@ void ProcessScheduler::priority ( Process *processes, int num_procs, bool preemp
             {
                 q_procs[q_size] = processes[i];
                 q_size++;
+            }
+            if (q_size > 0 && first_sort)
+            {
+                q_procs = priority_sort(q_procs, q_size);
+                first_sort = false;
             }
         }
         if (q_size > 0)
@@ -205,6 +212,8 @@ void ProcessScheduler::shortest_job_first ( Process *processes, int num_procs, b
     int q_size = 0;
     int fin_size = 0;
 
+    bool first_sort = true;
+
     Process temp;
 
     for (int i = 0; i < num_procs; i++)
@@ -219,6 +228,11 @@ void ProcessScheduler::shortest_job_first ( Process *processes, int num_procs, b
             {
                 q_procs[q_size] = processes[i];     // add process to list
                 q_size++;                           // increment size
+            }
+            if (q_size > 0 && first_sort)
+            {
+                first_sort = false;
+                q_procs = burst_sort(q_procs, q_size);
             }
         }        
         if (q_size > 0)
