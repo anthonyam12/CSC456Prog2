@@ -68,7 +68,7 @@ void ProcessScheduler::round_robin ( Process* processes, int quantum, int num_pr
     int time = 0, running_time = 0;
     int queued_procs_size = 0, fin_proc_size = 0;
 
-    cout << "ROUND ROBIN: " << endl;
+    cout << "Round Robin:" << endl;
     for (time = 0; time < total_time; time++)
     {
         // add processes that just arrived to end of queue
@@ -144,6 +144,10 @@ void ProcessScheduler::priority ( Process *processes, int num_procs, bool preemp
     for (int i = 0; i < num_procs; i++)
         total_time += processes[i].burst_time;
 
+    if (preempt)
+        cout << "Preemptive Priority Scheduling:" << endl;
+    else
+        cout << "Non-preemptive Priority Scheduling:" << endl;
     for (time = 0; time < total_time; time++)
     {
         for (int i = 0; i < num_procs; i++)
@@ -219,7 +223,10 @@ void ProcessScheduler::shortest_job_first ( Process *processes, int num_procs, b
     for (int i = 0; i < num_procs; i++)
         total_time += processes[i].burst_time;
 
-    cout << "Shortest Job First: " << endl;
+    if (preempt)
+        cout << "Preemptive Shortest Job First:" << endl;
+    else
+        cout << "Non-preemptive Shortest Job First:" << endl;
     for (int time = 0; time < total_time; time++)
     {
         for (int i = 0; i < num_procs; i++)
@@ -334,7 +341,11 @@ Process* ProcessScheduler::priority_sort ( Process *processes, int num_procs )
         }
     }
 
-    return sorted_procs;
+    for (i = 0; i < num_procs; i++)
+        processes[i] = sorted_procs[i];
+
+    delete []sorted_procs;
+    return processes;
 } 
 
 /******************************************************************************
