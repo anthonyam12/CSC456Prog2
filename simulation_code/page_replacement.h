@@ -56,7 +56,14 @@ void lru ()
 /******************************************************************************
 * Author: Anthony Morast
 *
-*
+* This method will implement the Least Frequently used page replacement
+* algorithm. The method goes through each index in the reference string and 
+* determines if the page is currently loaded into memory. If it is not the and 
+* there is an open space in the "stack" which contains all the frames the page
+* is simply added to the "stack" and a page fault occurs. Otherwise, the least
+* frequently used page is determined and is swapped for the newly needed page. 
+* The frames at each index in the reference string along with the number of 
+* page hits and misses is output at the end of the algorithms execution.
 ******************************************************************************/
 void lfu (int num_accesses, int *reference_string, int num_pages, int num_frames)
 {
