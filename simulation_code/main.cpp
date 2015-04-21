@@ -15,7 +15,7 @@ int main (int argc, char* argv[])
 {
     // required args: #processes, quantum, #frames, #pages, 
     string help = "-help";
-    if (!help.compare(argv[1]))
+    if (argc > 1 && !help.compare(argv[1]))
     {
         PrintHelp();
         return 0;
@@ -86,9 +86,21 @@ int main (int argc, char* argv[])
     cout << endl << endl;
 
     /***************** Page Replacement *******************/
-    int num_page_accesses = rand() % 20;
+    int num_page_accesses = rand() % (20) + 10;
+    int *reference_string = new int[num_page_accesses];
 
-    
+    for (int i = 0; i < num_page_accesses; i++)
+    {
+        int access = rand() % num_pages;
+        reference_string[i] = access;
+    }
+
+    fifo();
+    optimal();
+    lru();
+    lfu(num_page_accesses, reference_string, num_pages, num_frames);
+    second_chance(num_page_accesses, reference_string, num_pages, num_frames);
+    clock_alg(num_page_accesses, reference_string, num_pages, num_frames);
 
     return 0;
 }
@@ -101,5 +113,9 @@ void PrintHelp()
     cout << "\tquantum - the time quantum used in round robin scheduling (how long will each process have before preemption" << endl;
     cout << "\tnum_frames - the number of frames to be used for page replacement (how many pages loaded at a time." << endl;
     cout << "\tnum_pages - the number of pages that will be loaded into memory at some point." << endl;
+    cout << endl << "Information:\n";
+    cout << "\tThis program will simulate multiple process scheduling, memory management unit, and page replacement algorithms.";
+    cout << " The page replacement algorithms will use a maximum of 30 accesses and a minumum of 10 accesses. Each page is not garunteed";
+    cout << " to be accessed.";
     cout << endl << endl;
 }
