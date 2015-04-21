@@ -143,6 +143,8 @@ void lfu (int num_accesses, int *reference_string, int num_pages, int num_frames
 
     // print results
     PrintResults(each_frame, reference_string, num_accesses, num_frames);
+    cout << "Page Faults: " << page_faults << endl;
+    cout << "Page Hits: " << page_hits << endl << endl;
 
     delete[] uses;
     return;
