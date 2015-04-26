@@ -170,7 +170,18 @@ void lfu (int num_accesses, int *reference_string, int num_pages, int num_frames
 /******************************************************************************
 * Author: Anthony Morast
 *
-*
+* The second_chance method implements the page replacement algorithm known as
+* the second chance algorithm. The algorithm runs through each attempted access
+* and first determines if the page is already in a frame, if so a page hit 
+* counter is incremented and the next access is checked. If the page is not in
+* a frame, it will be determined if there is an empty frame, if so the new page
+* is inserted into the empty frame and a page fault counter is incremented. 
+* Lastly, if it is neither in a frame and there is no empty frame, the second
+* chance algorithm is implemented which determines if the page is recently 
+* referenced, if it has not been recently referenced it is chosen for 
+* replacement. If it has been accessed lately the reference bit (which says if
+* it has been referenced lately or not) is set to 0 making it a candidate for
+* replacement. The second chance is given by a reference bit being set to 1. 
 ******************************************************************************/
 void second_chance (int num_accesses, int *reference_string, int num_pages, int num_frames)
 {
@@ -287,11 +298,110 @@ void second_chance (int num_accesses, int *reference_string, int num_pages, int 
 /******************************************************************************
 * Author: Anthony Morast
 *
-*
+* The clock_alg method implements the page replacement algorithm known as
+* the clock algorithm. The algorithm runs through each attempted access
+* and first determines if the page is already in a frame, if so a page hit 
+* counter is incremented and the next access is checked. If the page is not in
+* a frame, it will be determined if there is an empty frame, if so the new page
+* is inserted into the empty frame and a page fault counter is incremented. 
+* Lastly, if it is neither in a frame and there is no empty frame, the clock 
+* algorithm is executed which will start at the last position that was pointed
+* to by the clock. If the reference bit of the current position is 1 it is set
+* to 0 and the clock hand is advanced, if the reference bit is 0, the current
+* position is recorded so the alg. knows where to start the next time. 
 ******************************************************************************/
 void clock_alg (int num_accesses, int *reference_string, int num_pages, int num_frames)
 {
-    
+    // used for output
+    int **each_frame = new int*[num_accesses];
+    for (int i = 0; i < num_accesses; i++)
+        each_frame[i] = new int[num_frames];
+    // tracks the page order at each clock tick
+    SecondChanceInfo *stack = new SecondChanceInfo[num_frames];
+
+    // initialize stack 
+    for (int j = 0; j < num_frames; j++)
+    {
+        stack[j].page_contained = -10;
+        stack[j].reference_bit = 0;
+    }
+
+    // some variables for display
+    int page_faults = 0;
+    int page_hits = 0;
+
+    // will determine if the page is inserted in an empty frame or is in a frame
+    bool added = false;
+    bool contains = true;
+    int last_pos = 0;  // keeps track of last position pointed to by clock hand
+
+    //foreach access 
+    cout << "--- Clock Page Replacement ---" << endl;
+    for (int i = 0; i < num_accesses; i++)
+    {
+        added = false;
+        contains = false;
+        
+        // determine if page is in a frame already
+        for (int j = 0; j < num_frames; j++)
+        {
+            if (stack[j].page_contained == reference_string[i])
+            {
+                stack[j].reference_bit = 1;
+                contains = true;
+                page_hits++;
+                break;
+            }
+        }
+
+        // if there is a page fault
+        if(!contains)
+        {
+            for (int j = 0; j < num_frames; j++)
+            {
+                if (stack[j].page_contained == -10)
+                {
+                    stack[j].page_contained = reference_string[i];
+                    stack[j].reference_bit = 0;
+                    added = true;
+                    page_faults++;
+                    break;
+                }
+            }
+            // execute clock algorithm
+            if (!added)
+            {
+                // start at last position "pointed to" by the clock hand
+                int curr_pos = last_pos + 1;
+                for (int j=curr_pos; ;j++)
+                {
+                    j %= num_frames;
+                    // if the reference bit is 0, replace the page
+                    if (stack[j].reference_bit == 0)
+                    {
+                        stack[j].page_contained = reference_string[i];
+                        last_pos = j; // set clock hand to this position
+                        break;
+                    }
+                    else // otherwise, clear reference bit, and move it to end
+                    {
+                        stack[j].reference_bit = 0;
+                    }
+                }
+                page_faults++;
+            }
+        }
+        // insert for output
+        for(int j = 0; j < num_frames; j++)
+            each_frame[i][j] = stack[j].page_contained;
+    }
+
+    // print results
+    PrintResults(each_frame, reference_string, num_accesses, num_frames);
+    cout << "Page Faults: " << page_faults << endl;
+    cout << "Page Hits: " << page_hits << endl << endl;
+
+    return;    
 }
 
 /******************************************************************************
