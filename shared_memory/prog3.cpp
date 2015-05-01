@@ -33,7 +33,7 @@ void mailbox_init(vector<string> & command)
 	int header_size = (sizeof(int)*2);
 
 	// Data block size (in kilobytes)
-	int data_size = num * size * 1024;
+	int data_size = num * (sizeof(lock) + (size * 1024));
 
 	// Get shared memory id
 	int shmid = shmget(SHMKEY, header_size + data_size, IPC_CREAT | IPC_EXCL | 0666);
@@ -46,13 +46,25 @@ void mailbox_init(vector<string> & command)
 	}
  
 	// Create header:
-
 		// Set pointer to start of header
 		int *headerp = (int*)shmat(shmid, 0, 0); 
 
 		// Write mailbox number and size to header
 		*headerp = num;
-		*(headerp + 1) = size; 
+		*(headerp + 1) = size;
+
+
+	// Iterate over all mailboxes and initialize locks
+		lock * l = (lock*)(headerp+2);
+		char * temp = (char*)l;
+		for (int i = 0 ; i < num; i++)
+		{
+			sem_init(&l->readlock,1,1);
+			sem_init(&l->writelock,1,1);
+			l->readercount = 0;
+			temp += (size*1024);
+			l = (lock*)(temp);
+		}
 
 	// Release shared memory
 	shmdt(headerp);
@@ -142,6 +154,10 @@ void mailbox_write(vector<string> & command)
 	// Get mailbox pointer
 	char *boxp = (char*)headerp + sizeof(int)*2 + (size*1024)*index;
 
+	lock * mlock = (lock*)boxp;
+
+	boxp += sizeof(lock);
+
 	// Error check
 	if (index >= num || index < 0)
 	{
@@ -152,12 +168,18 @@ void mailbox_write(vector<string> & command)
 		// If data is larger than the mailbox, truncate message and flag user 
 		if (msg.length() > ((size * 1024) - 1))
 		{
+			sem_wait(&mlock->writelock);
 			memcpy(boxp, msg.c_str(), ((size * 1024) - 1));
 			boxp[((size * 1024) - 1)] = '\0';
+			sem_post(&mlock->writelock);
 
 		}
 		else  // Else, write entire message to mailbox
+		{
+			sem_wait(&mlock->writelock);			
 			memcpy(boxp, msg.c_str(), msg.length());
+			sem_post(&mlock->writelock);
+		}
 
 	}
 
@@ -222,8 +244,30 @@ void mailbox_read(vector<string> & command)
 		// Get mailbox pointer
 		char *boxp = (char*)headerp + sizeof(int)*2 + (size*1024)*index;
 
+		lock * mlock = (lock*)boxp;
+
+		boxp += sizeof(lock);
+
 		// Read message string
+		sem_wait(&mlock->readlock);
+		mlock->readercount++;
+		if(mlock->readercount == 1)
+	    {
+	        sem_wait(&mlock->writelock);
+	    }
+	    sem_post(&mlock->readlock);
+
 		cout << boxp << endl;
+
+		sem_wait(&mlock->readlock);
+		mlock->readercount--;
+
+		if(mlock->readercount == 0)
+		{
+			sem_post(&mlock->writelock);
+		}
+
+		sem_post(&mlock->readlock);
 	}
 
 
@@ -278,8 +322,12 @@ void mailbox_copy(vector<string> & command)
 	int size = *(headerp + 1);
 
 	// Get mailbox pointers
-	char *boxp_to = (char*)headerp + sizeof(int)*2 + (size*1024)*index_from;
-	char *boxp_from = (char*)headerp + sizeof(int)*2 + (size*1024)*index_to;
+	char *boxp_to = (char*)headerp + sizeof(int)*2 + (size*1024)*index_to;
+	lock * lock_to = (lock*)boxp_to;
+	boxp_to += sizeof(lock);
+	char *boxp_from = (char*)headerp + sizeof(int)*2 + (size*1024)*index_from;
+	lock * lock_from = (lock*)boxp_from;
+	boxp_from += sizeof(lock);
 
 	// Error check
 	if (index_from >= num || index_from < 0 || 
@@ -291,7 +339,27 @@ void mailbox_copy(vector<string> & command)
 	else
 	{
 		// Copy data from one mailbox to the other
+
+		sem_wait(&lock_to->writelock);
+		sem_wait(&lock_from->readlock);
+		lock_from->readercount++;
+		if(lock_from->readercount == 1)
+	    {
+	        sem_wait(&lock_from->writelock);
+	    }
+	    sem_post(&lock_from->readlock);
+
 		strcpy(boxp_to, boxp_from);
+
+		sem_wait(&lock_from->readlock);
+		lock_from->readercount--;
+		if(lock_from->readercount == 0)
+		{
+			sem_post(&lock_from->writelock);
+		}
+		sem_post(&lock_from->readlock);
+
+		sem_post(&lock_to->writelock);
 	}
 
 

@@ -9,7 +9,6 @@
 #include <sys/shm.h>   // shared memory
 #include <semaphore.h> //semaphore shit
 
-
 using namespace std;
 
 #define SHMKEY 1109 // 0x455
@@ -21,5 +20,12 @@ void mailbox_write(vector<string> & );
 void mailbox_read(vector<string> & );
 void mailbox_copy(vector<string> & );
 bool check_num(string);
+
+struct lock
+{
+	int readercount;
+	sem_t readlock;
+	sem_t writelock;
+};
 
 #endif

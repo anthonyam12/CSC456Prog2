@@ -2,7 +2,7 @@ CC = g++
 
 LIBS =
 
-FLAGS = -Wall
+FLAGS = -Wall -pthread -g
 
 EXECS = dash
 

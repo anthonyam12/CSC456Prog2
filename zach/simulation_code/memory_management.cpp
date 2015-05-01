@@ -171,7 +171,7 @@ int custom_menu_prompt()
     printf("\t1. Setup/Reset System\n");
     printf("\t2. Create Process\n");
     printf("\t3. Terminate Process\n");
-    printf("\t4. Acess Memory\n");
+    printf("\t4. Access Memory\n");
     printf("\t5. View Process Information\n");
     printf("\t6. View System Information\n");
     printf("\t7. Back to Main Menu\n");
