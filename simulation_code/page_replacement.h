@@ -206,7 +206,6 @@ void optimal (int num_accesses, int *reference_string, int num_pages, int num_fr
                     }
                 }
 
-                printf("frames[%d] = %d\n", replace, reference_string[i]);
                 frames[replace] = reference_string[i];
 	    	}
     	}
