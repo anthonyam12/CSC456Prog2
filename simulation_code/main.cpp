@@ -176,9 +176,9 @@ void proc_pageReplace_sim()
             reference_string[i] = access;
         }
 
-        fifo();
-        optimal();
-        lru();
+        fifo(num_page_accesses, reference_string, num_pages, num_frames);
+        optimal(num_page_accesses, reference_string, num_pages, num_frames);
+        lru(num_page_accesses, reference_string, num_pages, num_frames);
         lfu(num_page_accesses, reference_string, num_pages, num_frames);
         second_chance(num_page_accesses, reference_string, num_pages, num_frames);
         clock_alg(num_page_accesses, reference_string, num_pages, num_frames);

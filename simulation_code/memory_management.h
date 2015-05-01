@@ -21,6 +21,7 @@ public:
     void Setup(vector<Process>& procs);
     unsigned int* Config_Page_Table(unsigned int memReq, unsigned int & size, unsigned int & fragmentation);
     bool Access_Memory(Process& proc, unsigned int mem); 
+    void Access_Multiple_Memory(vector<Process>& procs);
     void Terminate_Proc(Process& proc, unsigned int id);
     void Terminate_All_Procs(vector<Process>& procs);
     bool Create_Proc(Process& proc);
@@ -47,5 +48,6 @@ int custom_menu_prompt();
 double random_float( double min, double max);
 int random_int(int min, int max);
 bool prompt_proc_req(int& numProcs, int& low, int& high);
+bool prompt_mem_access(int& low, int& high);
 
 #endif

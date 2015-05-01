@@ -14,6 +14,8 @@
                                 Includes 
 ******************************************************************************/
 #include <iostream>
+#include <queue>
+#include <vector>
 
 using namespace std;
 
@@ -38,8 +40,80 @@ class SecondChanceInfo
 *
 *
 ******************************************************************************/
-void fifo ()
+void fifo (int num_accesses, int *reference_string, int num_pages, int num_frames)
 {
+	// will represent the stack at each time step 
+	int **each_frame = new int*[num_accesses];
+	for (int i = 0; i < num_accesses; i++)
+		each_frame[i] = new int[num_frames];
+	int *frames = new int[num_frames];
+
+	// initialize frames array 
+	for (int j = 0; j < num_frames; j++)
+		frames[j] = -10;
+
+	// some variables for display
+	int page_faults = 0;
+	int page_hits = 0;
+
+	// will determine if the page is inserted in an empty frame or is in a frame
+	bool added = false;
+	bool contains = true;
+
+	cout << "--- fifo Page Replacement ---" << endl;
+    // apply the algorithm 
+    for (int i = 0; i < num_accesses; i++)
+    {
+    	added = false;
+    	contains = false;
+
+    	// check if page is in a frame already
+    	for (int j = 0; j < num_frames; j++)
+    	{
+    		if (frames[j] == reference_string[i])
+    		{
+    			contains = true;
+    			page_hits++;
+    			break;
+    		}
+    	}
+
+    	// if it's not already loaded up
+    	if (!contains)
+    	{
+    		// there was a page fault
+    		page_faults++;
+
+    		// check if it is added to an empty frame
+	    	for (int j = 0; j < num_frames; j++)
+	    	{
+	    		// add to queue if empty
+	    		if (frames[j] == -10)
+	    		{
+	    			frames[j] = reference_string[i];
+	    			added = true;
+	    			break;
+	    		}
+	    	}
+
+
+			// if the page isn't inserted into an empty frame, apply the algorithm to put it in memory
+	    	if (!added) 
+	    	{
+	    		// use fifo algorithm
+                frames[(page_faults-1)%num_frames] = reference_string[i];
+            }
+    	}
+    	for(int j = 0; j < num_frames; j++)
+    		each_frame[i][j] = frames[j];
+    }
+
+    // print results
+    PrintResults(each_frame, reference_string, num_accesses, num_frames);
+    cout << "Page Faults: " << page_faults << endl;
+    cout << "Page Hits: " << page_hits << endl << endl;
+
+    return;
 
 }
 
@@ -48,8 +122,105 @@ void fifo ()
 *
 *
 ******************************************************************************/
-void optimal ()
+void optimal (int num_accesses, int *reference_string, int num_pages, int num_frames)
 {
+	// will represent the stack at each time step 
+	int **each_frame = new int*[num_accesses];
+	for (int i = 0; i < num_accesses; i++)
+		each_frame[i] = new int[num_frames];
+	int *frames = new int[num_frames];
+
+	// initialize frames 
+	for (int j = 0; j < num_frames; j++)
+		frames[j] = -10;
+
+	// some variables for display
+	int page_faults = 0;
+	int page_hits = 0;
+
+	// will determine if the page is inserted in an empty frame or is in a frame
+	bool added = false;
+	bool contains = true;
+
+	cout << "--- Optimal Page Replacement ---" << endl;
+    // apply the algorithm 
+    for (int i = 0; i < num_accesses; i++)
+    {
+    	added = false;
+    	contains = false;
+
+    	// check if page is in a frame already
+    	for (int j = 0; j < num_frames; j++)
+    	{
+    		if (frames[j] == reference_string[i])
+    		{
+    			contains = true;
+    			page_hits++;
+    			break;
+    		}
+    	}
+
+    	// if it's not already loaded up
+    	if (!contains)
+    	{
+    		// there was a page fault
+    		page_faults++;
+
+    		// check if it is added to an empty frame
+	    	for (int j = 0; j < num_frames; j++)
+	    	{
+	    		// add to frame if empty
+	    		if (frames[j] == -10)
+	    		{
+	    			frames[j] = reference_string[i];
+	    			added = true;
+	    			break;
+	    		}
+	    	}
+			// if the page isn't inserted into an empty frame, 
+            // apply the algorithm to put it in memory
+	    	if (!added) 
+	    	{
+                int max = 0;
+                int count;
+                int replace;
+                int index;
+                
+
+                //look forward to find the page that won't 
+                //be used for the longest period of time
+                for(int j = 0; j < num_frames; j++)
+                {
+                    count = 0;
+                    for(int k = i+1; k < num_accesses; k++)
+                    {
+                        count++;
+                        if(frames[j] == reference_string[k])
+                            break;
+                    }
+
+                    if(count > max)
+                    {
+                        replace = j;
+                        max = count;
+                    }
+                }
+
+                printf("frames[%d] = %d\n", replace, reference_string[i]);
+                frames[replace] = reference_string[i];
+	    	}
+    	}
+    	for(int j = 0; j < num_frames; j++)
+    		each_frame[i][j] = frames[j];
+
+    }
+
+    // print results
+    PrintResults(each_frame, reference_string, num_accesses, num_frames);
+    cout << "Page Faults: " << page_faults << endl;
+    cout << "Page Hits: " << page_hits << endl << endl;
+
+    return;
 
 }
 
@@ -58,9 +229,109 @@ void optimal ()
 *
 *
 ******************************************************************************/
-void lru ()
+void lru (int num_accesses, int *reference_string, int num_pages, int num_frames)
 {
+	// will represent the stack at each time step 
+	int **each_frame = new int*[num_accesses];
+	for (int i = 0; i < num_accesses; i++)
+		each_frame[i] = new int[num_frames];
+	int *frames = new int[num_frames];
 
+    bool found;
+    vector<int> recent;
+    int index;
+
+	// initialize frames 
+	for (int j = 0; j < num_frames; j++)
+		frames[j] = -10;
+
+	// some variables for display
+	int page_faults = 0;
+	int page_hits = 0;
+
+	// will determine if the page is inserted in an empty frame or is in a frame
+	bool added = false;
+	bool contains = true;
+
+	cout << "--- LRU Page Replacement ---" << endl;
+    // apply the algorithm 
+    for (int i = 0; i < num_accesses; i++)
+    {
+    	added = false;
+    	contains = false;
+
+    	// check if page is in a frame already
+    	for (int j = 0; j < num_frames; j++)
+    	{
+    		if (frames[j] == reference_string[i])
+    		{
+    			contains = true;
+    			page_hits++;
+    			break;
+    		}
+    	}
+
+    	// if it's not already loaded up
+    	if (!contains)
+    	{
+    		// there was a page fault
+    		page_faults++;
+
+    		// check if it is added to an empty frame
+	    	for (int j = 0; j < num_frames; j++)
+	    	{
+	    		// add to frame if empty
+	    		if (frames[j] == -10)
+	    		{
+	    			frames[j] = reference_string[i];
+	    			added = true;
+	    			break;
+	    		}
+	    	}
+			// if the page isn't inserted into an empty frame, 
+            // apply the algorithm to put it in memory
+	    	if (!added) 
+	    	{
+                //look back and find least recently used page
+                for(int j = i - 1; j >= 0 && (int)recent.size() < num_frames; j--)
+                {
+                    //Only push different page numbers. Check if different
+                    found = false;
+                    for(unsigned int k = 0; k < recent.size(); k++)
+                    {
+                        if(recent[k] == reference_string[j])
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if(!found)
+                        recent.push_back(reference_string[j]);
+                }
+                
+                //find index where least recent page accessed.
+                for(index = 0; index < num_frames; index++)
+                {
+                    if( frames[index] ==  recent.back() )
+                        break;
+                }
+
+                frames[index] = reference_string[i];
+                recent.clear();
+	    	}
+    	}
+    	for(int j = 0; j < num_frames; j++)
+    		each_frame[i][j] = frames[j];
+
+    }
+
+    // print results
+    PrintResults(each_frame, reference_string, num_accesses, num_frames);
+    cout << "Page Faults: " << page_faults << endl;
+    cout << "Page Hits: " << page_hits << endl << endl;
+
+    return;
 }
 
 /******************************************************************************

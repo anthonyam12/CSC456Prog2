@@ -165,10 +165,31 @@ bool MMU::Access_Memory(Process& proc, unsigned int mem)
 
     frame = proc.table[page];
 
-    printf("\nLogical page   %d with offset %d Accessed\n", page, offset);
-    printf("\nPhysical frame %d with offset %d Accessed\n", frame, offset);
+    printf("Logical page %d (frame %d) with offset %d Accessed\n", page, frame, offset);
 
     return true;
+}
+
+void MMU::Access_Multiple_Memory(vector<Process>& procs)
+{
+    int low;
+    int high;
+    int mem;
+
+    //prompt user for accessing memory.
+    if( !prompt_mem_access(low, high) )
+    {
+        printf("No memory accessed...\n");
+        return;
+    }
+
+    for(unsigned int i = 0; i < procs.size(); i++)
+    {
+        mem = random_int(low, high);
+        printf("Process %u tries to access memory at location %d:\n", i, mem);
+        Access_Memory(procs[i], mem);
+    }
+
 }
 
 int MMU::Total_Fragmentation(vector<Process>& procs)
@@ -232,6 +253,29 @@ void MMU::Create_Multiple_Procs(vector<Process>& procs)
     printf("%d new processes created!\n", i);
 }
 
+bool prompt_mem_access(int& low, int& high)
+{
+    //check for invalid input on lower bound
+    printf("lower bound for memory access: ");
+    scanf("%d", &low);
+    if(low < 0)
+    {
+        printf("Can't access negative memory address...\n");
+        return false;
+    }
+
+    //check for ivalid input on upper bound
+    printf("uppoer bound for memory access: ");
+    scanf("%d", &high);
+    if(high < low)
+    {
+        printf("upper bound needs to be higher than lower bound...\n");
+        return false;
+    }
+
+    return true;
+}
+
 bool prompt_proc_req(int& numProcs, int& low, int& high)
 {
     //check for invalid amount of processes
@@ -270,15 +314,16 @@ int custom_menu_prompt()
 
     printf("\tUser Defined Menu\n");
     printf("\t=================\n");
-    printf("\t1. Reset System\n");
-    printf("\t2. Create Single Process\n");
-    printf("\t3. Create Multiple Processes\n");
-    printf("\t4. Terminate Process\n");
-    printf("\t5. Terminate All Processes\n");
-    printf("\t6. Acess Memory\n");
-    printf("\t7. View Process Information\n");
-    printf("\t8. View System Information\n");
-    printf("\t9. Back to Main Menu\n");
+    printf("\t1.  Reset System\n");
+    printf("\t2.  Create Single Process\n");
+    printf("\t3.  Create Multiple Processes\n");
+    printf("\t4.  Terminate Process\n");
+    printf("\t5.  Terminate All Processes\n");
+    printf("\t6.  Access Memory\n");
+    printf("\t7.  Access Multiple Memory\n");
+    printf("\t8.  View Process Information\n");
+    printf("\t9.  View System Information\n");
+    printf("\t10. Back to Main Menu\n");
     printf("Choice: ");
     scanf("%d", &choice);
 
@@ -354,12 +399,15 @@ void memory_management_sim()
                 sys.Access_Memory(procs[temp], mem);
                 break;
             case 7:     //View Process Information
+                sys.Access_Multiple_Memory(procs);
+                break;
+            case 8:     //View Process Information
                 sys.View_Process_Info(procs);
                 break;
-            case 8:     //View System Information
+            case 9:     //View System Information
                 sys.View_System_Info(procs);
                 break;
-            case 9:     //Back to Main Menu
+            case 10:     //Back to Main Menu
                 end = true;
                 break;
             default:
@@ -367,6 +415,8 @@ void memory_management_sim()
                 break;
         }
     }
+
+    sys.Terminate_All_Procs(procs);
 }
 
 double random_float( double min, double max)
