@@ -38,6 +38,17 @@ class SecondChanceInfo
 /******************************************************************************
 * Author: Zachary Pierson
 *
+* The fifo method implements the page replacement algorithm known as
+* the First In First Out. The algorithm runs through each attempted access
+* and first determines if the page is already in a frame, if so a page hit 
+* counter is incremented and the next access is checked. If the page is not in
+* a frame, it will be determined if there is an empty frame, if so the new page
+* is inserted into the empty frame and a page fault counter is incremented. 
+* Lastly, if it is neither in a frame and there is no empty frame, then the 
+* fifo algorithm is executed. The first page that is inserted into a frame
+* will be the first page to be replaced. Naturally this is implemented with
+* a queue. however, we can simply mod the number of page faults with the number
+* of frames to get the frame replacement index.
 *
 ******************************************************************************/
 void fifo (int num_accesses, int *reference_string, int num_pages, int num_frames)
@@ -120,6 +131,16 @@ void fifo (int num_accesses, int *reference_string, int num_pages, int num_frame
 /******************************************************************************
 * Author: Zachary Pierson
 *
+* The optimal method implements the page replacement algorithm known as
+* the optimal page replacement. The algorithm runs through each attempted 
+* access and first determines if the page is already in a frame, if so a page
+* hit counter is incremented and the next access is checked. If the page is 
+* not in a frame, it will be determined if there is an empty frame, if so the 
+* new page is inserted into the empty frame and a page fault counter is 
+* incremented. Lastly, if it is neither in a frame and there is no empty 
+* frame, then the optimal page replacement algorithm is executed. This 
+* algorithm looks ahead and replaces the page that won't be used for the 
+* longest period of time.
 *
 ******************************************************************************/
 void optimal (int num_accesses, int *reference_string, int num_pages, int num_frames)
@@ -226,6 +247,15 @@ void optimal (int num_accesses, int *reference_string, int num_pages, int num_fr
 /******************************************************************************
 * Author: Zachary Pierson
 *
+* The lru method implements the page replacement algorithm known as
+* the Least Recently Used. The algorithm runs through each attempted access
+* and first determines if the page is already in a frame, if so a page hit 
+* counter is incremented and the next access is checked. If the page is not in
+* a frame, it will be determined if there is an empty frame, if so the new page
+* is inserted into the empty frame and a page fault counter is incremented. 
+* Lastly, if it is neither in a frame and there is no empty frame, then the 
+* lru algorithm is executed. This algorithm looks back though the reference 
+* string to determine which page what least recently used. 
 *
 ******************************************************************************/
 void lru (int num_accesses, int *reference_string, int num_pages, int num_frames)
@@ -294,7 +324,6 @@ void lru (int num_accesses, int *reference_string, int num_pages, int num_frames
                 //look back and find least recently used page
                 for(int j = i - 1; j >= 0 && (int)recent.size() < num_frames; j--)
                 {
-                    //Only push different page numbers. Check if different
                     found = false;
                     for(unsigned int k = 0; k < recent.size(); k++)
                     {
@@ -305,6 +334,7 @@ void lru (int num_accesses, int *reference_string, int num_pages, int num_frames
                         }
                     }
 
+                    //Only push different page numbers. 
                     if(!found)
                         recent.push_back(reference_string[j]);
                 }
