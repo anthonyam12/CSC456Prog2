@@ -1,0 +1,404 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Programming/Coding Assignment
+% LaTeX Template
+%
+% This template has been downloaded from:
+% http://www.latextemplates.com
+%
+% Original author:
+% Ted Pavlic (http://www.tedpavlic.com)
+%
+% Note:
+% The \lipsum[#] commands throughout this template generate dummy text
+% to fill the template out. These commands should all be removed when 
+% writing assignment content.
+%
+% This template uses a Perl script as an example snippet of code, most other
+% languages are also usable. Configure them in the "CODE INCLUSION 
+% CONFIGURATION" section.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{listings} % Required for insertion of code
+\usepackage{courier} % Required for the courier font
+\usepackage{mathtools}
+\usepackage[]{algorithm2e}
+%\usepackage{epsfig}
+%\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+
+
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+
+% Set up the header and footer
+\pagestyle{fancy}
+%\lhead{\hmwkAuthorName} % Top left header
+%\chead{\hmwkClass\ (\hmwkClassInstructor\ \hmwkClassTime): \hmwkTitle} % Top center head
+\rhead{\firstxmark \color{MyDarkGreen}\hmwkTitle} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+%----------------------------------------------------------------------------------------
+%	CODE INCLUSION CONFIGURATION
+%----------------------------------------------------------------------------------------
+
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0} % This is the color used for comments
+\lstloadlanguages{Perl} % Load Perl syntax for listings, for a list of other languages supported see: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstset{language=Perl, % Use Perl in this example
+        frame=single, % Single frame around code
+        basicstyle=\small\ttfamily, % Use small true type font
+        keywordstyle=[1]\color{Blue}\bf, % Perl functions bold and blue
+        keywordstyle=[2]\color{Purple}, % Perl function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar, % Custom functions underlined and blue
+        identifierstyle=, % Nothing special about identifiers                                         
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, % Comments small dark green courier font
+        stringstyle=\color{Purple}, % Strings are purple
+        showstringspaces=false, % Don't put marks in string spaces
+        tabsize=5, % 5 spaces per tab
+        %
+        % Put standard Perl functions not included in the default language here
+        morekeywords={rand},
+        %
+        % Put Perl function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        % Put user defined functions here
+        morekeywords=[3]{test},
+       	%
+        morecomment=[l][\color{Blue}]{...}, % Line continuation (...) like blue comment
+        numbers=left, % Line numbers on left
+        firstnumber=1, % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue}, % Line numbers are blue and small
+        stepnumber=5 % Line numbers go in steps of 5
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\perlscript}[2]{
+\begin{itemize}
+\item[]\lstinputlisting[caption=#2,label=#1]{#1.pl}
+\end{itemize}
+}
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1}{}\nobreak
+}
+
+\setcounter{secnumdepth}{0} % Removes default section numbers
+\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+
+\newcommand{\homeworkProblemName}{}
+\newenvironment{homeworkProblem}[1][Problem \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\stepcounter{homeworkProblemCounter} % Increase counter for number of problems
+\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
+\section{\homeworkProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+}{
+\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+\newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
+\noindent\framebox[\columnwidth][c]{\begin{minipage}{0.98\columnwidth}#1\end{minipage}} % Makes the box around the problem answer and puts the content inside
+}
+
+\newcommand{\homeworkSectionName}{}
+\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
+\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
+\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+}{
+\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Homework 3\\ (Shared Memory Portion)} % Assignment title
+\newcommand{\hmwkDueDate}{Sunday,\ May\ 1,\ 2015} % Due date
+\newcommand{\hmwkClass}{CSC\ 456} % Course/class
+\newcommand{\hmwkClassTime}{ } % Class/lecture time
+\newcommand{\hmwkClassInstructor}{ Dr. Karlsson} % Teacher/lecturer
+\newcommand{\hmwkAuthorName}{Lisa Woody} % Your name
+
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{
+\vspace{2in}
+\textmd{\textbf{\hmwkTitle}}\\
+\hmwkClass\ \\
+\vspace{1in}
+\normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
+\vspace{0.1in}\large{\textit{\hmwkClassInstructor\ \hmwkClassTime}}
+\vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+\date{} % Insert date here if you want it to appear below your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS
+%----------------------------------------------------------------------------------------
+
+%\setcounter{tocdepth}{1} % Uncomment this line if you don't want subsections listed in the ToC
+
+%\newpage
+%\tableofcontents
+%\newpage
+%\listoftables
+
+%\listoffigures
+
+%\listofalgorithms
+%\newpage
+
+%Listing \ref{homework_example} shows a Perl script.
+%\perlscript{homework_example}{Sample Perl Script With Highlighting}
+
+
+
+\section{Overview}
+Documentation for shared memory portion of Homework 3, as well as the supporting documentation from Homeworks 1 and 2
+
+\section{Purpose and Description}
+The purpose of the this portion of Homework 3 is to implement inter-process communication with shared memory in the shell developed over homeworks 1 and 2. The shell will setup the blocks of shared memory and the required semaphores to control access to the shared memory. \\
+
+The shell is a command line program that presents a prompt with a prompt string: $dash>$ and accepts commands to be executed at the prompt.\\
+
+The following commands were implemented in program 3:
+\begin{itemize}
+\item \textbf{mboxinit $<$\textit{number of mailboxes}$>$ $<$\textit{size of mailbox in kbytes}$>$} - Allocates shared memory mailboxes
+\item \textbf{mboxdel} - Cleans up semaphores and shared memory
+\item \textbf{mboxwrite $<$\textit{mailbox number}$>$} - Write data to a shared memory mailbox
+\item \textbf{mboxread $<$\textit{mailbox number}$>$ $<$\textit{pid}$>$} - Read data from a shared memory mailbox
+\item \textbf{mboxcopy $<$\textit{first mailbox number}$>$ $<$\textit{second mailbox number}$>$} - Copy the contents of the first mailbox to the second
+\end{itemize}
+
+The following commands were implemented in program 2:
+\begin{itemize}
+\item \textbf{$<$command + arguments$>$} - Run non-intrinsic command in a new process
+\item \textbf{cd $<$\textit{directory}$>$} - Changes the working directory of the process
+\item \textbf{signal $<$\textit{sig\_num}$>$ $<$\textit{pid}$>$} - Sends a signal to a process
+\item \textbf{$<$\textit{cmd1}$>$ $|$ $<$\textit{cmd2}$>$} - Pipes output from cmd1 as input into cmd2
+\item \textbf{$<$\textit{command + arguments}$>$ $>$ $<$\textit{file}$>$} - Redirects output from cmd into file
+\item \textbf{$<$\textit{command + arguments}$>$ $<$ $<$\textit{file}$>$} - Uses file as input for command\\
+\end{itemize}
+
+The following commands were implemented in program 1:
+\begin{itemize}
+\item \textbf{cmdnm $<$\textit{process id}$>$} - Displays the command string (name) that started the process for a given process ID
+\item \textbf{pid \textit{$<$command string$>$}} - Displays all process IDs whose command strings contain the given string.
+\item \textbf{systat} - Displays process information: Linux system version, system uptime, memory usage information, and CPU information.
+\item \textbf{exit} - exits the program
+\end{itemize}
+
+\section{Implementation}
+The program is implemented using a loop that prints out $dash>\ $ to the screen and reads in a line of user input from the iostream.  The line of user input is tokenized and the individual words placed in a vector. The first word is then matched to a command function or, if no match exists, returns a command not found error to the user.  Use of the $<enter>$ key simply reruns the loop and places the curser on a new $dash>\ $ input line.  A string that matches an existing command sends the command vector to a function that carries out that command on the rest of the user input.\\
+
+
+Each command is implemented as follows:\\
+\begin{itemize}
+\item \textbf{mboxinit $<$\textit{number of mailboxes}$>$ $<$\textit{size of mailbox in kbytes}$>$}\\
+One contiguous block of memory was allocated to hold all of the mailboxes. A header block was created at the beginning of the memory to store the number of mailboxes, the size of each box, and reader/writer lock structures for each mailbox.\\
+
+\item \textbf{mboxdel}\\
+After acquiring the shared memory id using the shared memory key, the program checks if the shared memory block has been initialized. After this verification is complete, the mailboxes are removed and the memory released with the following call: shmctl(\textit{shared memory id}, IPC\_RMID, 0)
+
+\item \textbf{mboxwrite $<$\textit{mailbox number}$>$} and \textbf{mboxread $<$\textit{mailbox number}$>$ $<$\textit{pid}$>$}\\
+A memory block is copied from the user input into the shared memory or vice versa.  To implement data synchronization, a reader/writer lock was constructed, allowing multiple processes to read data concurrently but only one process to write at a given time. Semaphores were used to implement the locks.
+\item \textbf{mboxcopy $<$\textit{first mailbox number}$>$ $<$\textit{second mailbox number}$>$}\\
+Using the semaphored first box mailbox is locked for reading, while the second mailbox is locked for writing. The block of memory is then read from the first box and written to the second using the strcopy command.
+
+\item \textbf{$<$command + arguments$>$}\\
+The dash shell is able to execute non-intrinsic Linux commands.  This is done by calling fork() to start a new process, which calls exec() to execute the commands. A test is done to determine if the command contains redirect or pipe symbols, in which case the execution is handled as described below.
+
+\item \textbf{cd $<$\textit{directory}$>$}\\
+The working directory of the process is changed by implementing the following call: chdir(\textit{directory})
+
+\item \textbf{signal $<$\textit{sig\_num}$>$ $<$\textit{pid}$>$}\\
+The shell calls the function kill(pid, sig\_num), which is a system call that sends the given signal (identified by sig\_num) to process pid.
+
+\item \textbf{signal catching}\\
+Uses the signal() function from signal.h to register a callback function that catches and reports all signals received.
+
+\item \textbf{Piping}\\
+Child process started in the fork\_exec() function, which handles non-shell-intrinsic commands, forks again to create a grandchild process.  The grandchild process used stdout as the input to the pipe, and implements the commands on the left-hand (output) side of the pipe. The child process uses that output as input for its implementation of the right hand side (input side) commands.
+
+
+\item \textbf{Redirection}\\
+Child process started in the fork\_exec() function, which handles non-shell-intrinsic commands, opens the file declared in the user command, creating one if no such file exists.  If the command calls for redirection from a commmand to a file, the child process closes stdout, which is then replaced with the file. Any output is written to that file.  Otherwise, if the redirection is from a file to the command, the stdin is replaced by the file, and serves as input for the command.
+
+\item \textbf{cmdnm $<$\textit{process id}$>$}\\
+Attempts to open and reads the first line of the file $/proc/<pid>/cmdline$.  If the file exists, this line, which represents the command that initialized the process, is printed to the screen.  Otherwise an error lets the user know that no matching process number was found.\\
+\item \textbf{pid \textit{$<$command string$>$}}\\
+The dirent library is used to browse each subdirectory in /proc directory whose name is determined to be an number.  For each such subdirectory, its name is used to open its matching $/proc/<pid>/cmdline$ file.  The user provided command string is then matched to all substrings of the first line of this file, which represents the command that initialized the process. Since this is done for every active process, all process numbers whose initialization commands contain a substring that matches the user provided command string are returned. These process numbers are printed to the screen.\\
+\item \textbf{systat}\\
+The following directories are accessed to display the system information:
+
+$/proc/version$ - Linux version information. \\
+$/proc/uptime$  - System uptime in seconds.\\
+$/proc/meminfo$ - System memory information\\
+$/proc/cpuinfo$ - CPU information\\
+Each item is output to the screen.
+
+\item \textbf{exit}\\
+Exits the input loop, which subsequently ends the program.
+\end{itemize}
+
+
+\section{External Resources}
+- This program relies on read access to the information exported by the kernel to the /proc directory.\\
+
+- GNU C and POSIX libraries utilized in this program:
+\begin{itemize}
+\item Process control commands such as fork() and exec()
+\item Pipe command
+\item Signal processing/handling
+\item Directory access
+\end{itemize}
+	
+- Some functions were based on the following code:
+\begin{itemize}
+\item http://www.mcs.sdsmt.edu/ckarlsso/csc456/spring15/code/jchen.c
+\item http://www.mcs.sdsmt.edu/ckarlsso/csc456/spring15/code/pipe1.c
+\end{itemize}
+
+
+\section{Submitted Files}
+\begin{itemize}
+\item prog1.pdf - assignment documentation
+\item Makefile  - make file for compiling the included programs
+\item dash.cpp  - main program file
+\item prog1.cpp - functions specific to assignment 1
+\item prog1.h   - header file specific to assignment 1
+\item prog2.cpp - functions specific to assignment 2
+\item prog2.h   - header file specific to assignment 2
+\item prog3.cpp - functions specific to assignment 3
+\item prog3.h   - header file specific to assignment 3
+\end{itemize}
+
+\section{Compilation}
+
+\begin{enumerate}
+\item Unzip the prog3.tgz file
+\item Use the terminal to change into the unzipped $prog3$ directory
+\item Enter the command \$make into the terminal
+\item The source code will compile and executables will be located in the $prog3$ directory.
+\end{enumerate}
+
+\section{Usage}
+
+Usage instructions for the following executable(s):
+\begin{itemize}
+\item $\$\ ./dash\ $ - initialize the program
+\item $dash>\ \ [user\ command]$ - type a command into the shell
+
+\end{itemize}
+
+
+\section{Testing and Verification}
+- The the generated results were matched against the output from Linux system tools such as $\$\ ps\ aux$ and the $/proc$ directory to  confirm their validity.  Invalid or missing command names and pid numbers returned errors successfully.  Commands were successfully matched to substrings of null-terminated command strings.\\
+- Non-shell-intrinsic command results were tested successfully against the results from running the same command in bash.\\
+
+Here are the tests I did to make sure the semaphores work correctly:\\
+
+Test 1:
+\begin{itemize}
+\item Create 10 mailboxes
+\item Add blocking function (cin) to critical section of write function.
+\item Write to mailbox 4, allow cin function to block execution of critical section code
+\item Attempt to read mailbox 4 from another dash process.
+\end{itemize}
+Result = Reading process is blocked until writing is complete and the updated message is read.\\
+
+Test 2:
+\begin{itemize}
+\item Create 10 mailboxes
+\item Add blocking function (cin) to critical section of read function.
+\item Dash process 1: Read from mailbox 1 (cin blocks in critical section)
+\item Dash process 2: Read from mailbox 1 (cin blocks in critical section)
+\item Dash process 3: Write to mailbox 1
+\end{itemize}
+Result = Writing process is blocked until all readers have finished critical section.\\
+
+Test 3:
+\begin{itemize}
+\item Create 10 mailboxes
+\item Add blocking function to critical section of reading method
+\item Write to mailbox 1
+\item Dash process 1: Read from mailbox 1 (blocking in critical section)
+\item Dash process 2: Copy from mailbox 1 to 2
+\end{itemize}
+Result = Copy function can proceed without waiting for process 1 to finish reading\\
+
+Test 4:
+\begin{itemize}
+\item Create 10 mailboxes
+\item Add blocking function to critical section of reading method
+\item Write to mailbox 1
+\item Dash process 1: Read from mailbox 2 (blocking in critical section)
+\item Dash process 2: Copy from mailbox 1 to 2
+\end{itemize}
+Result = Copy function must wait for process 1 to finish reading\\
+
+Test 5:
+\begin{itemize}
+\item Create 10 mailboxes
+\item Add blocking function to critical section of copy method
+\item Write to mailbox 1
+\item Process 1: Copy mailbox 1 to 2 (blocking in critical section)
+\item Process 2: Read from mailbox 1
+\item Process 2: Read from mailbox 2
+\end{itemize}
+Result = Process 2 can read from mailbox 1 but must wait for process 1 to finish copying before reading from mailbox 2.
+
+
+\end{document}
+

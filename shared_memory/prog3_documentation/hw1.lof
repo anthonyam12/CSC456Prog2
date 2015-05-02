@@ -1,0 +1,10 @@
+\contentsline {figure}{\numberline {1}{\ignorespaces Foster's Parallel Algorithm Design Methodology}}{4}
+\contentsline {figure}{\numberline {2}{\ignorespaces Communication Between Elements in 2D Simulation}}{5}
+\contentsline {figure}{\numberline {3}{\ignorespaces Agglomeration and Communication between elements in 2D Simulation}}{6}
+\contentsline {figure}{\numberline {4}{\ignorespaces Performance Analysis of OMP Implementation}}{10}
+\contentsline {figure}{\numberline {5}{\ignorespaces Strong Scalability of OMP Implementation}}{11}
+\contentsline {figure}{\numberline {6}{\ignorespaces Weak Scalability of OMP Implementation}}{12}
+\contentsline {figure}{\numberline {7}{\ignorespaces MPI Performance Analysis}}{13}
+\contentsline {figure}{\numberline {8}{\ignorespaces Strong Scalability of MPI Implementation}}{14}
+\contentsline {figure}{\numberline {9}{\ignorespaces Weak Scalability of MPI Implementation}}{14}
+\contentsline {figure}{\numberline {10}{\ignorespaces Wave Visualization}}{17}

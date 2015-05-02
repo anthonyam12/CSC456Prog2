@@ -1,0 +1,35 @@
+\contentsline {section}{Overview}{4}
+\contentsline {section}{Purpose and Description}{4}
+\contentsline {section}{Foster’s Design Methodology}{4}
+\contentsline {subsection}{Partitioning}{4}
+\contentsline {subsection}{Communication}{4}
+\contentsline {subsection}{Agglomeration}{5}
+\contentsline {subsection}{Mapping}{5}
+\contentsline {section}{One-Dimensional Wave Equation}{6}
+\contentsline {subsection}{Description}{6}
+\contentsline {subsection}{Shared-Memory Implementation}{7}
+\contentsline {subsubsection}{Synchronization}{7}
+\contentsline {subsection}{Distributed Implementation}{7}
+\contentsline {section}{Two-Dimensional Wave Equation}{8}
+\contentsline {subsection}{Description}{8}
+\contentsline {subsection}{Shared-Memory Implementation}{8}
+\contentsline {subsubsection}{Synchronization}{8}
+\contentsline {subsection}{Distributed Implementation}{9}
+\contentsline {section}{Analysis of Results}{9}
+\contentsline {subsection}{OMP}{9}
+\contentsline {subsubsection}{Speedup}{9}
+\contentsline {subsubsection}{Efficiency}{11}
+\contentsline {subsubsection}{Scalability}{11}
+\contentsline {subsection}{MPI}{12}
+\contentsline {subsubsection}{Speedup}{12}
+\contentsline {subsubsection}{Efficiency}{13}
+\contentsline {subsubsection}{Scalability}{13}
+\contentsline {section}{External Resources}{14}
+\contentsline {section}{Submitted Files}{15}
+\contentsline {section}{Compilation}{15}
+\contentsline {subsection}{Simulation}{15}
+\contentsline {subsection}{Visualizer}{15}
+\contentsline {section}{Usage}{16}
+\contentsline {subsection}{Simulation}{16}
+\contentsline {subsection}{Visualizer}{16}
+\contentsline {section}{Testing and Verification}{16}
